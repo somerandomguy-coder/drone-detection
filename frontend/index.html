@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title></title>
+    <link href="css/style.css" rel="stylesheet" />
+    <script src="scripts/index.js" defer></script>
+  </head>
+  <body>
+    <h1>Drone Detection</h1>
+    <p>
+      Upload your image here and then press submit to detect drone in the image
+    </p>
+    <form id="form">
+      <label for="image">Select image to upload</label>
+      <input type="file" id="input" name="imagefile" accept="image/*,.avif" />
+      <div id="preview">
+        <p>There's no image to display</p>
+      </div>
+      <button type="submit">Submit</button>
+    </form>
+  </body>
+</html>
