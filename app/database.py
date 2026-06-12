@@ -9,6 +9,8 @@ dotenv.load_dotenv()
 
 DATABASE_PATH = environ.get("database_path", "app/database.db")
 
+print(f"Database configuration:\n: database_path {DATABASE_PATH}")
+
 
 async def initialize_database():
     if not os.path.exists(DATABASE_PATH):
