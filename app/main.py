@@ -4,9 +4,12 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from uuid import uuid4
 
+from fastapi import FastAPI, File, HTTPException, Request, UploadFile, status
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
+
 from app.aimodel import get_yolo, model
 from app.database import initialize_database, save_prediction
-from fastapi import FastAPI, File, HTTPException, Request, UploadFile, status
 
 UPLOAD_FOLDER = Path("upload_images")
 UPLOAD_FOLDER.mkdir(exist_ok=True)
@@ -25,6 +28,16 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
+# Allow your frontend to talk to your backend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, swap "*" for your actual frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 # initialize here so the yolo object stay alive the whole lifetime of the application
 
 
@@ -33,16 +46,15 @@ async def helloWorld():
     return {"message": "Hello World"}
 
 
-@app.get("/checkhealth")
+@app.get("/checkhealth", response_class=HTMLResponse)
 async def checkhealth():
     return {"status": "healthy"}
 
 
 # Take an image, return the bounding boxes
-@app.post("/predict/{id}")
-async def predict(id: str, request: Request, file: UploadFile = File()):
-    if id == "":
-        id = str(uuid4())
+@app.post("/predict/", response_class=HTMLResponse)
+async def predict(request: Request, file: UploadFile = File()):
+    id = str(uuid4())
 
     if file == File():
         raise HTTPException(
@@ -63,8 +75,34 @@ async def predict(id: str, request: Request, file: UploadFile = File()):
 
     # everytime see something could go take a while, await it
     yolo_model = request.app.state.yolo_model
-    output = await model(yolo_model, save_path)
-    output = json.dumps(output)
+    raw_output = await model(yolo_model, save_path)
+    output = json.dumps(raw_output)
 
     await save_prediction(id, str(save_path), output)
-    return {"result": output}
+
+    response = ""
+
+    response = '<svg id="swappable_ui" class="boundingbox">' + response
+
+    for prediction in raw_output:
+        coordinate = prediction["coordinate"]
+        confidence = prediction["confidence"]
+
+        width = int(coordinate[2])
+        height = int(coordinate[3])
+
+        x_min = int(coordinate[0] - width / 2)
+        y_min = int(coordinate[1] - height / 2)
+
+        response = (
+            response
+            + f'<rect x="{x_min}" y="{y_min}" width="{width}" height="{height}" fill="none" stroke="red" />'
+        )
+
+        response = (
+            response
+            + f'<text x="{x_min}" y="{y_min + height}" fill="white">{confidence:.2f}</text>'
+        )
+
+    response = response + "</svg>"
+    return response

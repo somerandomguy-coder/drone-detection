@@ -6,19 +6,36 @@
     <title></title>
     <link href="css/style.css" rel="stylesheet" />
     <script src="scripts/index.js" defer></script>
+    <meta name="htmx-config" content='{"selfRequestsOnly": false}' />
+    <script
+      src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.10/dist/htmx.min.js"
+      integrity="sha384-H5SrcfygHmAuTDZphMHqBJLc3FhssKjG7w/CeCpFReSfwBWDTKpkzPP8c+cLsK+V"
+      crossorigin="anonymous"
+    ></script>
   </head>
   <body>
-    <h1>Drone Detection</h1>
+    <h1>Drone <span class="white">Detection</span></h1>
     <p>
       Upload your image here and then press submit to detect drone in the image
     </p>
-    <form id="form">
+    <form
+      id="form"
+      hx-post="http://localhost:8080/predict"
+      hx-encoding="multipart/form-data"
+      hx-target="#swappable_ui"
+      hx-swap="outerHTML"
+    >
       <label for="image">Select image to upload</label>
-      <input type="file" id="input" name="imagefile" accept="image/*,.avif" />
+      <input type="file" id="input" name="file" accept="image/*,.avif" />
       <div id="preview">
         <p>There's no image to display</p>
       </div>
       <button type="submit">Submit</button>
     </form>
+
+    <div id="result">
+      <img id="resultImg" src="" alt="your result goes here" />
+      <svg id="swappable_ui" class="boundingbox"></svg>
+    </div>
   </body>
 </html>
