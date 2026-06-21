@@ -14,6 +14,8 @@ from app.database import initialize_database, save_prediction
 UPLOAD_FOLDER = Path("upload_images")
 UPLOAD_FOLDER.mkdir(exist_ok=True)
 
+MAX_SIZE = 10 * 1024 * 1024
+
 
 # startup script to initialize_database
 @asynccontextmanager
@@ -48,30 +50,34 @@ async def helloWorld():
 
 @app.get("/checkhealth", response_class=HTMLResponse)
 async def checkhealth():
-    return {"status": "healthy"}
+    return "<div>The server is healthy</div>"
 
 
 # Take an image, return the bounding boxes
-@app.post("/predict/", response_class=HTMLResponse)
+@app.post("/predict", response_class=HTMLResponse)
 async def predict(request: Request, file: UploadFile = File()):
     id = str(uuid4())
+    file_size = file.size
 
-    if file == File():
+    if file_size and file_size > MAX_SIZE:
         raise HTTPException(
-            status.HTTP_400_BAD_REQUEST, "u have to send something real"
+            status.HTTP_413_CONTENT_TOO_LARGE,
+            f"File exceeded 10MB, your file size was {file_size}",
         )
+
+    if file_size == 0:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "File have to be not empty")
 
     filename = file.filename
     if filename is None:
-        raise HTTPException(
-            status.HTTP_400_BAD_REQUEST, "u have to send something real"
-        )
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "file have to have name")
 
     save_path = UPLOAD_FOLDER / filename
     save_path = Path(str(save_path) + str(uuid4()) + ".jpg")
 
+    contents = await file.read()
     with open(save_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+        buffer.write(contents)
 
     # everytime see something could go take a while, await it
     yolo_model = request.app.state.yolo_model
