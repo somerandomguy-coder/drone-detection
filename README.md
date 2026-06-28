@@ -1,5 +1,3 @@
----
-
 # 🛸 Drone Detection Web Application
 
 > An asynchronous full-stack web application that detects drones in uploaded images using a fine-tuned YOLOv8 model, displays real-time SVG bounding box overlays, and logs prediction history in an SQLite database.
@@ -8,7 +6,7 @@
 
 | 1. Upload & Preview | 2. Detection Result (SVG Overlay) |
 | :---: | :---: |
-| <img src="frontend/asset/before.jpg" width="400" alt="Upload Screen"> | <img src="frontend/asset/after.jpg" width="400" alt="Result Screen"> |
+| <img src="frontend/asset/before.png" width="400" alt="Upload Screen"> | <img src="frontend/asset/after.png" width="400" alt="Result Screen"> |
 ---
 
 ## 🚀 Features
