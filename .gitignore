@@ -8,3 +8,5 @@ venv/
 .env
 
 *.db
+examples/*.mp4
+Makefile
