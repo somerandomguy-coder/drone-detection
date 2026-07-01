@@ -41,8 +41,6 @@ def test_predict():
         assert content[:4] == b"<svg"
         assert content[-6:] == b"</svg>"
 
-        # TODO: check with database as well
-
 
 def test_predict_empty_file():
     with TestClient(app) as client:

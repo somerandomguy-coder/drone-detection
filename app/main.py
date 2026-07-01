@@ -1,5 +1,3 @@
-import json
-import shutil
 from contextlib import asynccontextmanager
 from pathlib import Path
 from uuid import uuid4
@@ -9,7 +7,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 
 from app.aimodel import get_yolo, model
-from app.database import initialize_database, save_prediction
 
 UPLOAD_FOLDER = Path("upload_images")
 UPLOAD_FOLDER.mkdir(exist_ok=True)
@@ -17,13 +14,11 @@ UPLOAD_FOLDER.mkdir(exist_ok=True)
 MAX_SIZE = 10 * 1024 * 1024
 
 
-# startup script to initialize_database
+# startup script to load YOLO model
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("loading model")
     app.state.yolo_model = get_yolo()
-    print("initializing database")
-    await initialize_database()
     yield
 
 
@@ -56,7 +51,6 @@ async def checkhealth():
 # Take an image, return the bounding boxes
 @app.post("/predict", response_class=HTMLResponse)
 async def predict(request: Request, file: UploadFile = File()):
-    id = str(uuid4())
     file_size = file.size
 
     if file_size and file_size > MAX_SIZE:
@@ -81,11 +75,7 @@ async def predict(request: Request, file: UploadFile = File()):
 
     # everytime see something could go take a while, await it
     yolo_model = request.app.state.yolo_model
-    raw_output = await model(yolo_model, save_path)
-    output = json.dumps(raw_output)
-
-    await save_prediction(id, str(save_path), output)
-
+    raw_output = await model(yolo_model, str(save_path))
     response = ""
 
     response = '<svg id="swappable_ui" class="boundingbox">' + response
