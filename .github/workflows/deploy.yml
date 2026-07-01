@@ -76,3 +76,14 @@ jobs:
       - name: Show Service URL
         run: |
           echo "Your service is live at: ${{ steps.deploy.outputs.url }}"
+
+      # -----------------------------------------------------------------------------------
+      # DEPLOY FRONTEND TO FIREBASE HOSTING
+      # -----------------------------------------------------------------------------------
+      - name: Deploy Frontend to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.GCP_SA_KEY }}'
+          projectId: '${{ env.PROJECT_ID }}'
+          channelId: live
