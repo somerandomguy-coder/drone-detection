@@ -7,7 +7,7 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }} # GCP Project ID
-  REGION: us-central1                        # Preferred Cloud Run region
+  REGION: australia-southeast1                        # Preferred Cloud Run region
   SERVICE_NAME: drone-detection              # Name of Cloud Run service
   GAR_REPO_NAME: drone-detection             # Name of Artifact Registry repository
 
