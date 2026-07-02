@@ -11,3 +11,4 @@ venv/
 examples/*.mp4
 Makefile
 upload_images/
+.firebase/
